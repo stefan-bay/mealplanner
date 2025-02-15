@@ -3,6 +3,7 @@ use std::sync::Arc;
 use axum::{http::StatusCode, response::IntoResponse, Error, Extension, Router};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
+use tower_http::services::ServeDir;
 
 use handlebars::{Handlebars, TemplateError};
 
@@ -41,6 +42,9 @@ async fn main() -> Result<(), Error> {
     )
     .fallback(not_found)
     .layer(Extension(view_engine));
+
+    // serve static files
+    let app = app.nest_service("/assets", ServeDir::new("assets"));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 5050));
     let listener = TcpListener::bind(addr).await.unwrap();
