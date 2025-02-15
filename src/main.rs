@@ -1,47 +1,18 @@
-use std::sync::Arc;
-
-use axum::{http::StatusCode, response::IntoResponse, Error, Extension, Router};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
+use axum::{Error, Router};
+use askama_axum::{IntoResponse, Response};
 
-use handlebars::{Handlebars, TemplateError};
-
-use mealplanner::{controllers, HbsViewEngine, ViewEngine};
-
-pub fn register_templates(hbs: &mut Handlebars) -> Result<(), TemplateError> {
-    // base
-    hbs.register_template_file("base", "templates/base.hbs")?;
-
-    // recipe
-    hbs.register_template_file("recipe/list", "templates/recipe/list.hbs")?;
-
-    // etc.
-    hbs.register_template_file("404", "templates/404.hbs")
-}
+use mealplanner::{controllers, views};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let mut hbs = Handlebars::new();
-
-    hbs.set_strict_mode(true);
-    hbs.set_dev_mode(true);
-
-    match register_templates(&mut hbs) {
-        Ok(_) => (),
-        Err(e) => {
-            println!("{:?}", e);
-            panic!("Could not register templates");
-        }
-    };
-
-    let view_engine: ViewEngine = Arc::new(HbsViewEngine::new(hbs));
 
     let app = Router::new().merge(
         controllers::recipe::routes()
     )
-    .fallback(not_found)
-    .layer(Extension(view_engine));
+    .fallback(not_found);
 
     // serve static files
     let app = app.nest_service("/assets", ServeDir::new("assets"));
@@ -55,6 +26,6 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
-async fn not_found(Extension(view_engine): Extension<ViewEngine>) -> impl IntoResponse {
-    view_engine.render_with_code("404", &(), StatusCode::NOT_FOUND)
+async fn not_found() -> Response {
+    views::not_found::show().into_response()
 }

@@ -1,11 +1,13 @@
-use axum::{Extension, response::IntoResponse, routing::get, Router};
+use axum::{routing::get, Router};
+use askama_axum::{IntoResponse, Response};
 
-use crate::{views::recipe, ViewEngine};
+use crate::views::recipe;
 
-async fn list(Extension(view_engine): Extension<ViewEngine>) -> impl IntoResponse {
-    recipe::list(&view_engine)
+async fn list() -> Response {
+    recipe::list().into_response()
 }
 
 pub fn routes() -> Router {
-    Router::new().route("/recipes", get(list))
+    Router::new()
+        .route("/recipes", get(list))
 }

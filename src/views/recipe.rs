@@ -1,7 +1,9 @@
-use axum::response::IntoResponse;
+use askama_axum::Template;
 
-use crate::ViewEngine;
+#[derive(Template)]
+#[template(path = "recipe/list.html")]
+pub struct List {}
 
-pub fn list(view_engine: &ViewEngine) -> impl IntoResponse {
-    view_engine.render("recipe/list", &())
+pub fn list() -> List {
+    List {}
 }
