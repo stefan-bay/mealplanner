@@ -1,17 +1,24 @@
 use std::net::SocketAddr;
+use sea_orm::{Database, DbErr};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
-use axum::{Error, Router};
+use axum::{Extension, Router};
 use askama_axum::{IntoResponse, Response};
 
 use mealplanner::{controllers, views};
 
+const DB_URL: &str = "sqlite:./mealplanner.db?mode=rwc";
+
 #[tokio::main]
-async fn main() -> Result<(), Error> {
+async fn main() -> Result<(), DbErr> {
+
+    let db = Database::connect(DB_URL).await?;
+    println!("Connected to database: {}", DB_URL);
 
     let app = Router::new().merge(
         controllers::recipe::routes()
     )
+    .layer(Extension(db))
     .fallback(not_found);
 
     // serve static files

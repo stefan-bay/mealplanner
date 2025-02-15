@@ -4,10 +4,22 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# async runtime
 tokio = { version = "1", features = ["full"] }
+
+# http lib
 axum = "0.8"
 tower-http = { version = "0.6", features = ["fs"] }
+
+# json serialization
 serde = { version = "1", features = ["derive"] }
 
+# db
+sea-orm = { version = "1.1", features = [ "sqlx-sqlite", "runtime-tokio-native-tls", "macros" ] }
+
+# time
+chrono = "0.4"
+
+# templating
 askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.4"
