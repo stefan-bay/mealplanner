@@ -1,12 +1,11 @@
-use axum::{extract::State, response::IntoResponse, routing::get, Router};
+use axum::{Extension, response::IntoResponse, routing::get, Router};
 
-use crate::{AppContext, views::recipe};
+use crate::{views::recipe, ViewEngine};
 
-async fn list(State(context): State<AppContext>) -> impl IntoResponse {
-    recipe::list(&context.hbs)
+async fn list(Extension(view_engine): Extension<ViewEngine>) -> impl IntoResponse {
+    recipe::list(&view_engine)
 }
 
-// pub fn routes(context: &AppContext) -> Router {
-pub fn routes(context: AppContext) -> Router<AppContext> {
-    Router::new().route("/recipes", get(list)).with_state(context.clone())
+pub fn routes() -> Router {
+    Router::new().route("/recipes", get(list))
 }

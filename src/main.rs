@@ -1,25 +1,28 @@
-use std::{sync::Arc, fs};
+use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, response::{Html, IntoResponse}, Error, Router};
+use axum::{http::StatusCode, response::IntoResponse, Error, Extension, Router};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 use handlebars::{Handlebars, TemplateError};
 
-use mealplanner::{AppContext, controllers};
+use mealplanner::{controllers, HbsViewEngine, ViewEngine};
 
 pub fn register_templates(hbs: &mut Handlebars) -> Result<(), TemplateError> {
-    hbs.register_template_file("recipe/list", "views/recipe/list.hbs")
+    // recipe
+    hbs.register_template_file("recipe/list", "templates/recipe/list.hbs")?;
+
+    hbs.register_template_file("404", "templates/404.html")
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let mut handlebars = Handlebars::new();
+    let mut hbs = Handlebars::new();
 
-    handlebars.set_strict_mode(true);
-    handlebars.set_dev_mode(true);
+    hbs.set_strict_mode(true);
+    hbs.set_dev_mode(true);
 
-    match register_templates(&mut handlebars) {
+    match register_templates(&mut hbs) {
         Ok(_) => (),
         Err(e) => {
             println!("{:?}", e);
@@ -27,11 +30,13 @@ async fn main() -> Result<(), Error> {
         }
     };
 
-    let context = AppContext { hbs: Arc::new(handlebars) };
+    let view_engine: ViewEngine = Arc::new(HbsViewEngine::new(hbs));
 
     let app = Router::new().merge(
-        controllers::recipe::routes(context.clone())
-    ).fallback(not_found).with_state(context);
+        controllers::recipe::routes()
+    )
+    .fallback(not_found)
+    .layer(Extension(view_engine));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 5050));
     let listener = TcpListener::bind(addr).await.unwrap();
@@ -42,10 +47,6 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
-async fn not_found(State(_context): State<AppContext>) -> impl IntoResponse {
-    let contents = fs::read_to_string("views/404.html");
-    match contents {
-        Ok(html) => (StatusCode::NOT_FOUND, Html(html)),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, Html(String::from("Render Error")))
-    }
+async fn not_found(Extension(view_engine): Extension<ViewEngine>) -> impl IntoResponse {
+    view_engine.render_with_code("404", &(), StatusCode::NOT_FOUND)
 }

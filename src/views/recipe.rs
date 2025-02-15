@@ -1,13 +1,7 @@
-use axum::{http::StatusCode, response::{Html, IntoResponse}};
-use handlebars::Handlebars;
+use axum::response::IntoResponse;
 
-pub fn list(hbs: &Handlebars) -> impl IntoResponse {
-    let resp = hbs.render("recipe/list", &());
-    if resp.is_err() {
-        println!("{:?}", resp)
-    }
-    match resp {
-        Ok(html) => (StatusCode::OK, Html(html)),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, Html(String::from("Render Error")))
-    }
+use crate::ViewEngine;
+
+pub fn list(view_engine: &ViewEngine) -> impl IntoResponse {
+    view_engine.render("recipe/list", &())
 }
