@@ -9,16 +9,13 @@ use crate::models::recipe::{Entity, Column};
 use crate::views::recipe as view_recipe;
 
 async fn list(Extension(db): Extension<DatabaseConnection>) -> Response {
-    let item = Entity::find()
-    .order_by(Column::Id, Order::Desc)
+    let items_res = Entity::find()
+    .order_by(Column::CreatedAt, Order::Desc)
     .all(&db)
     .await;
 
-    match item {
-        Ok (models) => {
-            println!("Found models! {:?}", models);
-            view_recipe::list().into_response()
-        },
+    match items_res {
+        Ok (items) => view_recipe::list(&items).into_response(),
         Err(e) => {
             println!("{:?}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, "DB Error").into_response()

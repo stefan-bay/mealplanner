@@ -5,8 +5,9 @@
 {% block content %}
     <h1>Recipes</h1>
     <ul>
-        <li>Recipe 1</li>
-        <li>Recipe 2</li>
+        {% for recipe in recipes %}
+        <li>{{ recipe.created_at }} {{ recipe.title }}</li>
+        {% endfor %}
     </ul>
     {% call super() %}
 {% endblock %}
