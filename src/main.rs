@@ -9,10 +9,14 @@ use handlebars::{Handlebars, TemplateError};
 use mealplanner::{controllers, HbsViewEngine, ViewEngine};
 
 pub fn register_templates(hbs: &mut Handlebars) -> Result<(), TemplateError> {
+    // base
+    hbs.register_template_file("base", "templates/base.hbs")?;
+
     // recipe
     hbs.register_template_file("recipe/list", "templates/recipe/list.hbs")?;
 
-    hbs.register_template_file("404", "templates/404.html")
+    // etc.
+    hbs.register_template_file("404", "templates/404.hbs")
 }
 
 #[tokio::main]
