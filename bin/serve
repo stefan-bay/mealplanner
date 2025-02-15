@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+watchexec --exts rs,html --restart --ignore target -- cargo run
