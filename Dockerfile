@@ -10,15 +10,11 @@ WORKDIR /app
 # Install host build dependencies.
 RUN apk add --no-cache clang lld musl-dev git
 
-RUN --mount=type=bind,source=src,target=src \
-    --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
-    --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
-    --mount=type=bind,source=templates,target=templates \
-    --mount=type=cache,target=/app/target/ \
-    --mount=type=cache,target=/usr/local/cargo/git/db \
-    --mount=type=cache,target=/usr/local/cargo/registry/ \
-cargo build --locked --release && \
-cp ./target/release/$APP_NAME /bin/server
+COPY . .
+RUN mkdir -p ./build && \
+    cargo build --locked --release && \
+    cp ./target/release/$APP_NAME ./build/server && \
+    cp -r ./assets ./build/assets
 
 ## Exec stage
 FROM alpine:3.18 AS final
@@ -36,8 +32,10 @@ RUN adduser \
     appuser
 USER appuser
 
-COPY --from=build /bin/server /bin/
+WORKDIR /app
+
+COPY --from=build /app/build .
 
 EXPOSE 5050
 
-CMD ["/bin/server"]
+CMD ["/app/server"]
