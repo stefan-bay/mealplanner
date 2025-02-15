@@ -17,7 +17,7 @@ async fn main() -> Result<(), Error> {
     // serve static files
     let app = app.nest_service("/assets", ServeDir::new("assets"));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 5050));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 5050));
     let listener = TcpListener::bind(addr).await.unwrap();
 
     println!("Server listening on {}", listener.local_addr().unwrap());
