@@ -7,7 +7,7 @@ use askama_axum::{IntoResponse, Response};
 
 use mealplanner::{controllers, views};
 
-const DB_URL: &str = "sqlite:./mealplanner.db?mode=rwc";
+const DB_URL: &str = "sqlite:db/mealplanner.db?mode=rwc";
 
 #[tokio::main]
 async fn main() -> Result<(), DbErr> {

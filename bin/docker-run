@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+docker run -dit -p 5050:5050 --name mealplanner-server --volume db:/app/db mealplanner
+if [ $? -ne 0 ]; then
+    echo "Have you built the image yet?"
+fi
