@@ -2,8 +2,7 @@ use std::net::SocketAddr;
 use sea_orm::{Database, DbErr};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
-use axum::{Extension, Router};
-use askama_axum::{IntoResponse, Response};
+use axum::{Extension, Router, response::{IntoResponse, Response}};
 
 use mealplanner::{controllers, views};
 

@@ -1,8 +1,10 @@
 #[allow(dead_code)]
 
-use askama_axum::{IntoResponse, Template};
+use axum::response::IntoResponse;
 
-use crate::models::recipe::Model;
+use askama::Template;
+
+use crate::{models::recipe::Model, HtmlTemplate};
 
 #[derive(Template)]
 #[template(path = "recipe/list.html")]
@@ -27,7 +29,9 @@ impl RecipeDisplay {
 pub fn list(items: &[Model]) -> impl IntoResponse {
     let display_items: Vec<RecipeDisplay> = items.iter().map(RecipeDisplay::new).collect();
 
-    ListTemplate {
+    let template = ListTemplate {
         recipes: display_items
-    }
+    };
+
+    HtmlTemplate(template)
 }
